@@ -114,14 +114,14 @@ class ChatChannel(Channel):
                     if context["origin_ctype"] == ContextType.VOICE:
                         logger.info("[WX]receive group voice, but checkprefix didn't match")
                     return None
-            else:  # 单聊
-                match_prefix = check_prefix(content, conf().get("single_chat_prefix", [""]))
-                if match_prefix is not None:  # 判断如果匹配到自定义前缀，则返回过滤掉前缀+空格后的内容
-                    content = content.replace(match_prefix, "", 1).strip()
-                elif context["origin_ctype"] == ContextType.VOICE:  # 如果源消息是私聊的语音消息，允许不匹配前缀，放宽条件
-                    pass
-                else:
-                    return None
+            # else:  # 单聊
+            #     match_prefix = check_prefix(content, conf().get("single_chat_prefix", [""]))
+            #     if match_prefix is not None:  # 判断如果匹配到自定义前缀，则返回过滤掉前缀+空格后的内容
+            #         content = content.replace(match_prefix, "", 1).strip()
+            #     elif context["origin_ctype"] == ContextType.VOICE:  # 如果源消息是私聊的语音消息，允许不匹配前缀，放宽条件
+            #         pass
+            #     else:
+            #         return None
             content = content.strip()
             img_match_prefix = check_prefix(content, conf().get("image_create_prefix"))
             if img_match_prefix:

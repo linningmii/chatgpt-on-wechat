@@ -149,7 +149,8 @@ class ChatGPTBot(Bot, OpenAIImage):
             elif isinstance(e, openai.error.APIConnectionError):
                 logger.warn("[CHATGPT] APIConnectionError: {}".format(e))
                 need_retry = False
-                result["content"] = "我连接不到你的网络"
+                # result["content"] = "我连接不到你的网络"
+                result["content"] = "多多睡觉了，也许晚点睡醒了会搭理你"
             else:
                 logger.exception("[CHATGPT] Exception: {}".format(e))
                 need_retry = False
