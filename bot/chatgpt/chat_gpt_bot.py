@@ -15,6 +15,7 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from common.token_bucket import TokenBucket
 from config import conf, load_config
+from bot.azure.azure_endpoint import AzureEndpoint
 
 
 # OpenAI对话模型API (可用)
@@ -32,6 +33,7 @@ class ChatGPTBot(Bot, OpenAIImage):
             self.tb4chatgpt = TokenBucket(conf().get("rate_limit_chatgpt", 20))
 
         self.sessions = SessionManager(ChatGPTSession, model=conf().get("model") or "gpt-3.5-turbo")
+        self.duoduo_bot = AzureEndpoint()
         self.args = {
             "model": conf().get("model") or "gpt-3.5-turbo",  # 对话模型的名称
             "temperature": conf().get("temperature", 0.9),  # 值在[0,1]之间，越大表示回复越具有不确定性
@@ -49,49 +51,52 @@ class ChatGPTBot(Bot, OpenAIImage):
             logger.info("[CHATGPT] query={}".format(query))
 
             session_id = context["session_id"]
-            reply = None
-            clear_memory_commands = conf().get("clear_memory_commands", ["#清除记忆"])
-            if query in clear_memory_commands:
-                self.sessions.clear_session(session_id)
-                reply = Reply(ReplyType.INFO, "记忆已清除")
-            elif query == "#清除所有":
-                self.sessions.clear_all_session()
-                reply = Reply(ReplyType.INFO, "所有人记忆已清除")
-            elif query == "#更新配置":
-                load_config()
-                reply = Reply(ReplyType.INFO, "配置已更新")
-            if reply:
-                return reply
+            # reply = None
+            # clear_memory_commands = conf().get("clear_memory_commands", ["#清除记忆"])
+            # if query in clear_memory_commands:
+            #     self.sessions.clear_session(session_id)
+            #     reply = Reply(ReplyType.INFO, "记忆已清除")
+            # elif query == "#清除所有":
+            #     self.sessions.clear_all_session()
+            #     reply = Reply(ReplyType.INFO, "所有人记忆已清除")
+            # elif query == "#更新配置":
+            #     load_config()
+            #     reply = Reply(ReplyType.INFO, "配置已更新")
+            # if reply:
+            #     return reply
             session = self.sessions.session_query(query, session_id)
             logger.debug("[CHATGPT] session query={}".format(session.messages))
 
-            api_key = context.get("openai_api_key")
-            model = context.get("gpt_model")
-            new_args = None
-            if model:
-                new_args = self.args.copy()
-                new_args["model"] = model
+            # api_key = context.get("openai_api_key")
+            # model = context.get("gpt_model")
+            # new_args = None
+            # if model:
+            #     new_args = self.args.copy()
+            #     new_args["model"] = model
             # if context.get('stream'):
             #     # reply in stream
             #     return self.reply_text_stream(query, new_query, session_id)
 
-            reply_content = self.reply_text(session, api_key, args=new_args)
-            logger.debug(
-                "[CHATGPT] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
-                    session.messages,
-                    session_id,
-                    reply_content["content"],
-                    reply_content["completion_tokens"],
-                )
-            )
-            if reply_content["completion_tokens"] == 0 and len(reply_content["content"]) > 0:
-                reply = Reply(ReplyType.ERROR, reply_content["content"])
-            elif reply_content["completion_tokens"] > 0:
-                self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
-                reply = Reply(ReplyType.TEXT, reply_content["content"])
-            else:
-                reply = Reply(ReplyType.ERROR, reply_content["content"])
-                logger.debug("[CHATGPT] reply {} used 0 tokens.".format(reply_content))
+            # reply_content = self.reply_text(session, api_key, args=new_args)
+            # logger.debug(
+            #     "[CHATGPT] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
+            #         session.messages,
+            #         session_id,
+            #         reply_content["content"],
+            #         reply_content["completion_tokens"],
+            #     )
+            # )
+            # if reply_content["completion_tokens"] == 0 and len(reply_content["content"]) > 0:
+            #     reply = Reply(ReplyType.ERROR, reply_content["content"])
+            # elif reply_content["completion_tokens"] > 0:
+            #     self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
+            #     reply = Reply(ReplyType.TEXT, reply_content["content"])
+            # else:
+            #     reply = Reply(ReplyType.ERROR, reply_content["content"])
+            #     logger.debug("[CHATGPT] reply {} used 0 tokens.".format(reply_content))
+            answer = self.duoduo_bot.chat(session_id=session_id, query=query)
+            reply = Reply(ReplyType.TEXT, answer)
+
             return reply
 
         elif context.type == ContextType.IMAGE_CREATE:

@@ -10,6 +10,7 @@ from common.log import logger
 # 将所有可用的配置项写在字典里, 请使用小写字母
 # 此处的配置值无实际意义，程序不会读取此处的配置，仅用于提示格式，请将配置加入到config.json中
 available_setting = {
+    "bot_name": "",
     # openai api配置
     "open_ai_api_key": "",  # openai api key
     # openai apibase，当use_azure_chatgpt为true时，需要设置对应的api base
@@ -104,7 +105,9 @@ available_setting = {
     # 知识库平台配置
     "use_linkai": False,
     "linkai_api_key": "",
-    "linkai_app_code": ""
+    "linkai_app_code": "",
+    "azure_endpoint_url": "",
+    "azure_endpoint_key": ""
 }
 
 
