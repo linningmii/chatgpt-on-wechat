@@ -31,10 +31,18 @@ class SessionManager:
             history = history[-20:]
         self.set(session_id=session_id, new_history=history)
 
+    def get_nickname(self, doc_dict) -> str:
+        nickname0_map = doc_dict.get("nickname0.name", {})
+        return nickname0_map.get("name", "")
+
     def get_user_information(self, doc) -> str:
+        if doc is None:
+            return "You don't know this guy yet."
+        doc_dict = doc.to_dict()
+
         return f'''
-birthday: {doc.get("birthday", "unknown")}
-gender: {doc.get("gender", "unknown")}
-name: {doc.get("name", "unknown")}
-nickname: {doc.get("nickname0", "unknown")}
+birthday: {doc_dict.get("birthday", "unknown")}
+gender: {doc_dict.get("gender", "unknown")}
+name: {doc_dict.get("name", "unknown")}
+nickname: {self.get_nickname(doc_dict)}
         '''.strip()

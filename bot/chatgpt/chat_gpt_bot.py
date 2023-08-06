@@ -33,7 +33,7 @@ class ChatGPTBot(Bot, OpenAIImage):
             self.tb4chatgpt = TokenBucket(conf().get("rate_limit_chatgpt", 20))
 
         self.sessions = SessionManager(ChatGPTSession, model=conf().get("model") or "gpt-3.5-turbo")
-        self.duoduo_bot = AzureEndpoint()
+        self.azure_endpoint = AzureEndpoint()
         self.args = {
             "model": conf().get("model") or "gpt-3.5-turbo",  # 对话模型的名称
             "temperature": conf().get("temperature", 0.9),  # 值在[0,1]之间，越大表示回复越具有不确定性
@@ -94,7 +94,10 @@ class ChatGPTBot(Bot, OpenAIImage):
             # else:
             #     reply = Reply(ReplyType.ERROR, reply_content["content"])
             #     logger.debug("[CHATGPT] reply {} used 0 tokens.".format(reply_content))
-            answer = self.duoduo_bot.chat(session_id=session_id, query=query)
+            azure_endpoint_unique_id = context.get("other_user_nickname")
+            if azure_endpoint_unique_id is None:
+                azure_endpoint_unique_id = session_id
+            answer = self.azure_endpoint.chat(unique_id=azure_endpoint_unique_id, query=query)
             reply = Reply(ReplyType.TEXT, answer)
 
             return reply

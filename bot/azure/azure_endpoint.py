@@ -24,9 +24,9 @@ class AzureEndpoint:
             return []
         return history
 
-    def chat(self, raw_session_id: str, query: str) -> str:
-        user = self.db.query_by_associated_id(raw_session_id)
-        session_id = raw_session_id
+    def chat(self, unique_id: str, query: str) -> str:
+        user = self.db.query_by_associated_id(unique_id)
+        session_id = unique_id
         if user is not None:
             session_id = user.id
         logger.info(session_id + "说：" + query)
