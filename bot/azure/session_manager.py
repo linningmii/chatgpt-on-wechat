@@ -32,7 +32,7 @@ class SessionManager:
         self.set(session_id=session_id, new_history=history)
 
     def get_nickname(self, doc_dict) -> str:
-        nickname0_map = doc_dict.get("nickname0.name", {})
+        nickname0_map = doc_dict.get("nickname0", {})
         return nickname0_map.get("name", "")
 
     def get_user_information(self, doc) -> str:
