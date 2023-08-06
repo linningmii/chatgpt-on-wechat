@@ -4,6 +4,7 @@ import json
 from string import Template
 from bot.azure.session_manager import SessionManager
 from common.log import logger
+from database.firestore import Firestore
 
 
 class AzureEndpoint:
@@ -12,6 +13,7 @@ class AzureEndpoint:
         self.endpoint_url = conf().get("azure_endpoint_url")
         self.endpoint_key = conf().get("azure_endpoint_key")
         self.session_manager = SessionManager()
+        self.db = Firestore()
 
     def update_history(self, session_id: str, query: str, answer: str):
         self.session_manager.append(session_id=session_id, query=query, answer=answer)
@@ -22,7 +24,11 @@ class AzureEndpoint:
             return []
         return history
 
-    def chat(self, session_id: str, query: str) -> str:
+    def chat(self, raw_session_id: str, query: str) -> str:
+        user = self.db.query_by_associated_id(raw_session_id)
+        session_id = raw_session_id
+        if user is not None:
+            session_id = user.id
         logger.info(session_id + "说：" + query)
 
         if query == "$记忆清除":
@@ -34,7 +40,8 @@ class AzureEndpoint:
 
         payload = json.dumps({
             "chat_history": self.load_history(session_id),
-            "query": query
+            "query": query,
+            "user_information": self.session_manager.get_user_information(doc=user)
         })
         headers = {
             'Authorization': auth_template.substitute(key=self.endpoint_key),

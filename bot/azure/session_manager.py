@@ -30,3 +30,11 @@ class SessionManager:
         if len(history) > 20:
             history = history[-20:]
         self.set(session_id=session_id, new_history=history)
+
+    def get_user_information(self, doc) -> str:
+        return f'''
+birthday: {doc.get("birthday", "unknown")}
+gender: {doc.get("gender", "unknown")}
+name: {doc.get("name", "unknown")}
+nickname: {doc.get("nickname0", "unknown")}
+        '''.strip()
