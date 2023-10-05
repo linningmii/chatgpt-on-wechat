@@ -7,3 +7,5 @@ chardet==5.2.0
 Pillow
 pre-commit
 firebase_admin
+Flask>=3.0.0
+pycryptodome
